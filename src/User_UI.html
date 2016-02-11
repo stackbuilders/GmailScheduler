@@ -22,10 +22,6 @@
       return google.script.run.withSuccessHandler(showAlert).withFailureHandler(showError)
     }
 
-    function validate () {
-      return true
-    }
-
     function getHandlersAndHidePrefs () {
       showLoadingMessage(true)
       return getHandlers()
@@ -92,10 +88,18 @@
 
     }
 
-    var timerLabelValid = false
-    function validateTimerLabel (label) {
-      return timerLabelValid
+    function validateTimerLabel () {
+        var time = document.getElementById("datetimepicker").value
+        var timerLabelDateString = document.getElementById('timerLabelDateString')
+        if(time){
+            timerLabelDateString.classList.remove('bg-danger')
+            addTimerLabel(time)
+        } else {
+            timerLabelDateString.innerHTML = "Invalid date. Date musn't be empty."
+            timerLabelDateString.classList.add('bg-danger')
+        }
     }
+
     function deleteTimerLabel (item) {
       var label = item.parentNode.childNodes[0].innerHTML
       var liItem = item.parentNode
@@ -123,10 +127,9 @@
 
     function addTimerLabel (label) {
       var timerLabelDateString = document.getElementById('timerLabelDateString')
-      var timerLabelInput = document.getElementById('new_timer_label')
+      var timerLabelInput = document.getElementById('datetimepicker')
       google.script.run.withSuccessHandler(function () {
         addTimerLabelToList(label)
-
         timerLabelDateString.innerHTML = 'Added GScheduler/Timer/"' + label + '" to your Gmail now'
         timerLabelInput.value = ''
       }).withFailureHandler(showError).createTimerChildLabel(label)
@@ -156,38 +159,17 @@
       google.script.run.withSuccessHandler(function (userEmail) {
         document.getElementById('loggedinUserEmail').innerHTML = userEmail
       }).withFailureHandler(showError).getActiveUserEmail()
-
-      var timerLabelInput = document.getElementById('new_timer_label')
-      var timerLabelDateString = document.getElementById('timerLabelDateString')
-      timerLabelInput.onkeyup = function () {
-        timerLabelValid = false
-
-        document.getElementById('timerLabelDateString').innerHTML = 'Processing date'
-
-        google.script.run.withSuccessHandler(function (dateString) {
-          if (dateString != null) {
-            timerLabelValid = true
-            document.getElementById('timerLabelDateString').innerHTML = 'The label &ldquo;' + timerLabelInput.value + '&rdquo; would trigger the email on ' + dateString + '. Please click &ldquo;Add&rdquo; to create this label.'
-            timerLabelInput.parentNode.classList.remove('has-error')
-            timerLabelInput.parentNode.classList.add('has-success')
-
-            timerLabelDateString.classList.remove('bg-danger')
-
-          } else {
-            timerLabelValid = false
-            document.getElementById('timerLabelDateString').innerHTML = 'Invalid date to "Date in the past / Cannot find date from label name"'
-            timerLabelInput.parentNode.classList.remove('has-success')
-            timerLabelInput.parentNode.classList.add('has-error')
-
-            timerLabelDateString.classList.add('bg-danger')
-          }
-        }).withFailureHandler(showError).parseDateFormat(timerLabelInput.value)
-      }
     }
     </script>
     <head>
         <title>GmailScheduler</title>
-
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.1/jquery-ui-timepicker-addon.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.1/jquery-ui-sliderAccess.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.1/i18n/jquery-ui-timepicker-addon-i18n.min.js"></script>
+        <link href="//cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.1/jquery-ui-timepicker-addon.min.css" rel="stylesheet"/>
+        <link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/smoothness/jquery-ui.css" rel="stylesheet"/>
     </head>
     <body onload="init();" style="width:800px">
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
@@ -211,10 +193,11 @@
                 To make a message return to your inbox, simply add a label that corresponds to when you want the message returned to your inbox and then archive the message. The message will return to inbox as scheduled.<br/><br/>
                 A few commonly used labels are already added for you. You can go ahead and create additional labels for delayed delivery periods that you are most likely to use.</div><br/>
                 <div class="form-group">
-                <label for="enterLabels" style="float:left;margin-right:10px;">Create a new label</label>
-                <input type="text" class="form-control" name="new_timer_label" placeholder="Enter a label" id="new_timer_label" style="width:300px;float:left;margin-right:10px;" ></input>
-
-              <input type="button"    class="btn btn-primary" name="add_timer_label" value="Add" onclick='if (validateTimerLabel()) addTimerLabel(document.getElementById("new_timer_label").value)'>
+                    <label for="enterLabels" style="float:left;margin-right:10px;">Create a new label</label>
+                    <div class="col-sm-5">
+                        <input type="text" id="datetimepicker" class="form-control datetimepicker" placeholder="Enter a label" readonly>
+                    </div>
+                    <input type="button" class="btn btn-primary" name="add_timer_label" value="Add" onclick='validateTimerLabel()'>
                 </div>
 
                 <p>
@@ -283,8 +266,14 @@
                 <input type="radio" name="nolabel_drafs_to_inbox" id="nolabel_drafs_to_inbox_false" value=false>No</input>
                 </div><br/>
             </fieldset>
-            <button class="btn btn-primary" type='button' onclick='if (validate()) savePrefsForm()'>Save Settings</button>
+            <button class="btn btn-primary" type='button' onclick='savePrefsForm()'>Save Settings</button>
         </form>
         </div>
+        <script>
+        $('#datetimepicker').datetimepicker({
+            timeInput: true,
+            timeFormat: "hh:mm tt"
+        });
+        </script>
     </body>
 </html>
