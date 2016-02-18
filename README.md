@@ -28,6 +28,10 @@ Returning messages to inbox
 - Another useful feature is to allow Gmail to return messages back to inbox.
 - Simply apply a label under timer to any of our message and it will be returned back to your inbox as per schedule.
 
+Log your messages into a Google Sheet
+- GmailScheduler logs into a Google Sheet information about the labeled messages, like the schedule time, sent time (if it was sent), recipient(s), subject, and the status.
+- They are logged into a Google Sheet called *GmailScheduler Log File* in a sheet called *GmailScheduler Logs*. You can always change your settings to avoid logging your messages.
+
 Accessing your GmailScheduler settings:
 - https://script.google.com/macros/s/AKfycbw6hnnKGeG6xUsbRE9c3WSvJibTbaW88DP9f83e8lFnc1v1kL0/exec
 
