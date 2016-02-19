@@ -127,6 +127,7 @@ function getUserChildLabels (label) {
 }
 
 function parseDate (str) {
+  Utilities.sleep(1000)
   if (dateConversionRequired(str)) {
     return convertToUserDate(Date.future(str))
   }
